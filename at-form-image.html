@@ -287,6 +287,11 @@ that all of your HTML imports are concatenated into one file.__
 
     disabledChanged: function (newValue, oldValue) {
       this.toggleClass('disabled', this.disabled, this.$.buttonDiv);
+      if (this.disabled) {
+        this.toggleClass('error', false, this.$.fileDiv);
+      } else {
+        this.toggleClass('error', !this.valid, this.$.fileDiv);
+      }
     },
 
     _getResultOfExtensionsValidation: function (extensionsStr, files) {
