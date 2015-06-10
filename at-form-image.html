@@ -59,7 +59,7 @@ that all of your HTML imports are concatenated into one file.__
       <div id="fileDiv" class="field">
         <label>{{label}}</label>
         <div class="vertical layout">
-          <div class="flex">
+          <div class="horizontal layout">
             <div id="imagePreview" class="imagePreview"></div>
           </div>
           <div class="horizontal layout center">
@@ -142,7 +142,7 @@ that all of your HTML imports are concatenated into one file.__
     _isReady: false,
 
     selectFileClickHandler: function () {
-      var clickEvent = document.createEvent('HTMLEvents');
+      var clickEvent = document.createEvent('MouseEvent');
       clickEvent.initEvent('click', false, false);
       this.$.fileInputInput.dispatchEvent(clickEvent);
     },
