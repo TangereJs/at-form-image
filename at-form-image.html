@@ -30,9 +30,11 @@ that all of your HTML imports are concatenated into one file.__
       position: relative;
     }
     
-    #buttonText {
+    .buttonText {
       vertical-align: middle;
+      white-space: normal;
       padding-left: 6px;
+      padding-right: 6px;
     }
     
     .previewImage {
@@ -64,11 +66,13 @@ that all of your HTML imports are concatenated into one file.__
             <div id="imagePreview" class="imagePreview"></div>
           </div>
           <div class="horizontal layout center">
-            <div id="buttonDiv" class="ui button" on-click="selectFileClickHandler">
-              <at-carbon-icon id="aciIcon" icon="{{icon}}"></at-carbon-icon><span id="buttonText">Select a file</span>
+            <div id="buttonDiv" class="ui labeled icon button" on-click="selectFileClickHandler">
+              <at-carbon-icon id="aciIcon" class="icon" icon="{{icon}}"></at-carbon-icon>
+              <div id="buttonText" class="buttonText">Select a file</div>
             </div>
-            <div id="removeButtonDiv" class="ui button hidden" on-click="removeFileClickHandler">
-              <at-carbon-icon id="aciIcon" icon="{{icon}}"></at-carbon-icon><span id="buttonText">Remove</span>
+            <div id="removeButtonDiv" class="ui labeled icon button hidden" on-click="removeFileClickHandler">
+              <at-carbon-icon id="aciIcon" class="icon" icon="cancel"></at-carbon-icon>
+              <div class="buttonText">Remove</div>
             </div>
           </div>
         </div>
@@ -149,7 +153,7 @@ that all of your HTML imports are concatenated into one file.__
     },
 
     removeFileClickHandler: function () {
-      this.$.buttonText = 'Select a file';
+      this.$.buttonText.textContent = 'Select a file';
       this.toggleClass('hidden', true, this.$.removeButtonDiv);
       this.$.imagePreview.removeChild(this.$.imagePreview.children[0]);
       this.$.fileInputInput.value = '';
@@ -199,7 +203,7 @@ that all of your HTML imports are concatenated into one file.__
 
       if (this.value.valid.length > 0) {
         var selectedFile = this.value.valid[0];
-        this.$.buttonText = 'Change';
+        this.$.buttonText.textContent = 'Change';
         this.toggleClass('hidden', false, this.$.removeButtonDiv);
 
         var fileReader = new FileReader();
