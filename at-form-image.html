@@ -292,6 +292,7 @@ that all of your HTML imports are concatenated into one file.__
 
     disabledChanged: function (newValue, oldValue) {
       this.toggleClass('disabled', this.disabled, this.$.buttonDiv);
+      this.toggleClass('disabled', this.disabled, this.$.removeButtonDiv);
       if (this.disabled) {
         this.toggleClass('error', false, this.$.fileDiv);
       } else {
