@@ -29,14 +29,14 @@ that all of your HTML imports are concatenated into one file.__
     :host {
       position: relative;
     }
-    
+
     .buttonText {
       vertical-align: middle;
       white-space: normal;
       padding-left: 6px;
       padding-right: 6px;
     }
-    
+
     .previewImage {
       vertical-align: middle;
       height: auto;
@@ -46,21 +46,26 @@ that all of your HTML imports are concatenated into one file.__
       margin-left: auto;
       margin-right: auto;
     }
-    
+
     .imagePreview {
       width: 250px;
       height: 150px;
     }
-    
+
     .hidden {
       visibility: hidden;
+    }
+    .hide-label {
+      display: none;
     }
   </style>
   <template>
     <at-core-theme></at-core-theme>
     <div class="ui form">
-      <div id="fileDiv" class="field">
+      <div class="" id="labelContainer">
         <label>{{label}}</label>
+      </div>
+      <div id="fileDiv" class="field">
         <div class="vertical layout">
           <div class="horizontal layout">
             <div id="imagePreview" class="imagePreview"></div>
@@ -88,6 +93,11 @@ that all of your HTML imports are concatenated into one file.__
       label: {
         type: String,
         value: 'Select an image'
+      },
+      hideTitle: {
+        type: Boolean,
+        value: false,
+        observer: 'hideTitleChanged'
       },
       icon: {
         type: String,
@@ -145,7 +155,9 @@ that all of your HTML imports are concatenated into one file.__
     },
     _scopeCssViaAttr: true,
     _isReady: false,
-
+    hideTitleChanged: function (newValue, oldValue) {
+      this.toggleClass("hide-label", newValue, this.$.labelContainer);
+    },
     selectFileClickHandler: function () {
       var clickEvent = document.createEvent('MouseEvent');
       clickEvent.initEvent('click', false, false);
