@@ -55,6 +55,7 @@ that all of your HTML imports are concatenated into one file.__
     .hidden {
       visibility: hidden;
     }
+
     .hide-label {
       display: none;
     }
@@ -153,18 +154,25 @@ that all of your HTML imports are concatenated into one file.__
         observer: 'disabledChanged'
       }
     },
+    $meta: {
+      title: "Image",
+      form: {
+        type: "string",
+        xtype: "image"
+      }
+    },
     _scopeCssViaAttr: true,
     _isReady: false,
-    hideTitleChanged: function (newValue, oldValue) {
+    hideTitleChanged: function(newValue, oldValue) {
       this.toggleClass("hide-label", newValue, this.$.labelContainer);
     },
-    selectFileClickHandler: function () {
+    selectFileClickHandler: function() {
       var clickEvent = document.createEvent('MouseEvent');
       clickEvent.initEvent('click', false, false);
       this.$.fileInputInput.dispatchEvent(clickEvent);
     },
 
-    removeFileClickHandler: function () {
+    removeFileClickHandler: function() {
       this.$.buttonText.textContent = 'Select a file';
       this.toggleClass('hidden', true, this.$.removeButtonDiv);
       this.$.imagePreview.removeChild(this.$.imagePreview.children[0]);
@@ -177,7 +185,7 @@ that all of your HTML imports are concatenated into one file.__
       });
     },
 
-    changeHandler: function () {
+    changeHandler: function() {
       var files = Array.prototype.slice.call(this.$.fileInputInput.files),
         invalid = {
           count: 0
@@ -220,7 +228,7 @@ that all of your HTML imports are concatenated into one file.__
 
         var fileReader = new FileReader();
         var self = this;
-        fileReader.onload = function (event) {
+        fileReader.onload = function(event) {
           var newImage = document.createElement('img');
           newImage.classList.add('previewImage');
           newImage.setAttribute('style-scope', 'at-form-image');
@@ -237,9 +245,9 @@ that all of your HTML imports are concatenated into one file.__
       this.validate();
     },
 
-    created: function () {},
+    created: function() {},
 
-    ready: function () {
+    ready: function() {
       if (this.maxFiles > 1) {
         this.$.fileInputInput.setAttribute("multiple", "");
       }
@@ -259,7 +267,7 @@ that all of your HTML imports are concatenated into one file.__
       this._isReady = true;
     },
 
-    _updateValidState: function () {
+    _updateValidState: function() {
       // && this.value ; added this to guard against error that happens when element is validated without first selecting a file
       if (this.required) {
         this._setValid(this.value.valid.length > 0);
@@ -268,7 +276,7 @@ that all of your HTML imports are concatenated into one file.__
       }
     },
 
-    validate: function () {
+    validate: function() {
       this._updateValidState();
 
       this.toggleClass('error', !this.valid, this.$.fileDiv);
@@ -276,11 +284,11 @@ that all of your HTML imports are concatenated into one file.__
       return this.valid;
     },
 
-    reset: function () {
+    reset: function() {
       this.created();
     },
 
-    _getLowerCaseExtension: function (filename) {
+    _getLowerCaseExtension: function(filename) {
       var extIdx = filename.lastIndexOf(".") + 1;
 
       if (extIdx > 0) {
@@ -288,7 +296,7 @@ that all of your HTML imports are concatenated into one file.__
       }
     },
 
-    _getResultOfCountLimitValidation: function (limit, files) {
+    _getResultOfCountLimitValidation: function(limit, files) {
       if (limit > 0 && limit < files.length) {
         return {
           invalid: files.slice(limit, files.length),
@@ -302,7 +310,7 @@ that all of your HTML imports are concatenated into one file.__
       };
     },
 
-    disabledChanged: function (newValue, oldValue) {
+    disabledChanged: function(newValue, oldValue) {
       this.toggleClass('disabled', this.disabled, this.$.buttonDiv);
       this.toggleClass('disabled', this.disabled, this.$.removeButtonDiv);
       if (this.disabled) {
@@ -312,7 +320,7 @@ that all of your HTML imports are concatenated into one file.__
       }
     },
 
-    _getResultOfExtensionsValidation: function (extensionsStr, files) {
+    _getResultOfExtensionsValidation: function(extensionsStr, files) {
       if (extensionsStr) {
         var negate = extensionsStr.charAt(0) === "!",
           extensions = JSON.parse(extensionsStr.toLowerCase().substr(negate ? 1 : 0)),
@@ -322,7 +330,7 @@ that all of your HTML imports are concatenated into one file.__
           };
 
         var self = this;
-        files.forEach(function (file) {
+        files.forEach(function(file) {
           var extension = self._getLowerCaseExtension(file.name);
 
           if (extensions.indexOf(extension) >= 0) {
@@ -341,7 +349,7 @@ that all of your HTML imports are concatenated into one file.__
       };
     },
 
-    _getResultOfSizeValidation: function (minSize, maxSize, files) {
+    _getResultOfSizeValidation: function(minSize, maxSize, files) {
       if (!minSize && !maxSize) {
         return {
           tooBig: [],
@@ -354,7 +362,7 @@ that all of your HTML imports are concatenated into one file.__
         tooBig = [],
         tooSmall = [];
 
-      files.forEach(function (file) {
+      files.forEach(function(file) {
         if (minSize && file.size < minSize) {
           tooSmall.push(file);
         } else if (maxSize && file.size > maxSize) {
