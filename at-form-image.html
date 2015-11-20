@@ -154,13 +154,11 @@ that all of your HTML imports are concatenated into one file.__
         observer: 'disabledChanged'
       }
     },
-    $meta: {
+    $meta: [{
       title: "Image",
-      form: {
-        type: "string",
-        xtype: "image"
-      }
-    },
+      type: "string",
+      xtype: "image"
+    }],
     _scopeCssViaAttr: true,
     _isReady: false,
     hideTitleChanged: function(newValue, oldValue) {
