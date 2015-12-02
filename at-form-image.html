@@ -4,23 +4,7 @@
 <link rel="import" href="../at-carbon-icon/at-carbon-icon.html" />
 
 <!--
-A better `<input type="file">`.
-
-### What's wrong with `<input type="file">`?
-
-1. It's difficult to skin/style as the look and feel of the element is mostly determined by the user agent.
-2. Access to the selected files are provided via `FileList` object, which is a pseudo-array (not a "real" array, with useful sugar like `forEach`, etc).
-3. You want any sort of file validation?  Do it yourself!
-4. The API is lacking in many respects.
-
-Now, a new, better, evolved (and evolving) element to take its place: `<file-input>`!
-
-__Don't forget to [vulcanize](http://www.polymer-project.org/articles/concatenating-web-components.html)
-your main/parent HTML file before deploying into production.  This will ensure
-that all of your HTML imports are concatenated into one file.__
-
-@element at-form-file
-@status beta
+@element at-form-image
 @homepage index.html
 -->
 
@@ -52,39 +36,41 @@ that all of your HTML imports are concatenated into one file.__
       height: 150px;
     }
 
-    .hidden {
-      visibility: hidden;
+    .remove-button-hidden {
+      visibility: remove-button-hidden;
     }
 
-    .hide-label {
+    .hidden {
       display: none;
     }
   </style>
   <template>
     <at-core-theme></at-core-theme>
-    <div class="ui form">
-      <div class="" id="labelContainer">
-        <label>{{label}}</label>
-      </div>
-      <div id="fileDiv" class="field">
-        <div class="vertical layout">
-          <div class="horizontal layout">
-            <div id="imagePreview" class="imagePreview"></div>
-          </div>
-          <div class="horizontal layout center">
-            <div id="buttonDiv" class="ui labeled icon button" on-click="selectFileClickHandler">
-              <at-carbon-icon id="aciIcon" class="icon" icon="{{icon}}"></at-carbon-icon>
-              <div id="buttonText" class="buttonText">Select a file</div>
+    <div id="atFormImageWrapper">
+      <div class="ui form">
+        <div class="" id="labelContainer">
+          <label>{{label}}</label>
+        </div>
+        <div id="fileDiv" class="field">
+          <div class="vertical layout">
+            <div class="horizontal layout">
+              <div id="imagePreview" class="imagePreview"></div>
             </div>
-            <div id="removeButtonDiv" class="ui labeled icon button hidden" on-click="removeFileClickHandler">
-              <at-carbon-icon id="aciIcon" class="icon" icon="cancel"></at-carbon-icon>
-              <div class="buttonText">Remove</div>
+            <div class="horizontal layout center">
+              <div id="buttonDiv" class="ui labeled icon button" on-click="selectFileClickHandler">
+                <at-carbon-icon id="aciIcon" class="icon" icon="{{icon}}"></at-carbon-icon>
+                <div id="buttonText" class="buttonText">Select a file</div>
+              </div>
+              <div id="removeButtonDiv" class="ui labeled icon button remove-button-hidden" on-click="removeFileClickHandler">
+                <at-carbon-icon id="aciIcon" class="icon" icon="cancel"></at-carbon-icon>
+                <div class="buttonText">Remove</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <input style="display: none" accept$="{{accept}}" id="fileInputInput" on-change="changeHandler" type="file" />
     </div>
-    <input style="display: none" accept$="{{accept}}" id="fileInputInput" on-change="changeHandler" type="file" />
   </template>
 </dom-module>
 <script>
@@ -152,6 +138,17 @@ that all of your HTML imports are concatenated into one file.__
         type: Boolean,
         value: false,
         observer: 'disabledChanged'
+      },
+      /**
+       * Hides the element. When hidden nothing is displayed for the element
+       * @property hide
+       * @type Boolean
+       * @default false
+       */
+      hide: {
+        type: Boolean,
+        value: false,
+        observer: 'hideChanged'
       }
     },
     $meta: [{
@@ -162,7 +159,11 @@ that all of your HTML imports are concatenated into one file.__
     _scopeCssViaAttr: true,
     _isReady: false,
     hideLabelChanged: function(newValue, oldValue) {
-      this.toggleClass("hide-label", newValue, this.$.labelContainer);
+      this.toggleClass("hidden", newValue, this.$.labelContainer);
+    },
+    hideChanged: function (newValue, oldValue) {
+      var wrapper = this.$.atFormImageWrapper;
+      this.toggleClass('hidden', newValue, wrapper);
     },
     selectFileClickHandler: function() {
       var clickEvent = document.createEvent('MouseEvent');
@@ -172,7 +173,7 @@ that all of your HTML imports are concatenated into one file.__
 
     removeFileClickHandler: function() {
       this.$.buttonText.textContent = 'Select a file';
-      this.toggleClass('hidden', true, this.$.removeButtonDiv);
+      this.toggleClass('remove-button-hidden', true, this.$.removeButtonDiv);
       this.$.imagePreview.removeChild(this.$.imagePreview.children[0]);
       this.$.fileInputInput.value = '';
       this._setValue({
@@ -222,7 +223,7 @@ that all of your HTML imports are concatenated into one file.__
       if (this.value.valid.length > 0) {
         var selectedFile = this.value.valid[0];
         this.$.buttonText.textContent = 'Change';
-        this.toggleClass('hidden', false, this.$.removeButtonDiv);
+        this.toggleClass('remove-button-hidden', false, this.$.removeButtonDiv);
 
         var fileReader = new FileReader();
         var self = this;
@@ -470,7 +471,7 @@ that all of your HTML imports are concatenated into one file.__
    *         Select Files
    *     </file-input>
    *
-   * @attribute accept
+   * @property accept
    * @type string
    */
 
@@ -490,7 +491,7 @@ that all of your HTML imports are concatenated into one file.__
    * native implementation detail in the browser.
    *
    *
-   * @attribute directory
+   * @property directory
    */
 
   /**
@@ -512,7 +513,7 @@ that all of your HTML imports are concatenated into one file.__
    *         Select Files
    *     </file-input>
    *
-   * @attribute extensions
+   * @property extensions
    * @type Array
    */
 
@@ -534,7 +535,7 @@ that all of your HTML imports are concatenated into one file.__
    *         Select Files
    *     </file-input>
    *
-   * @attribute maxFiles
+   * @property maxFiles
    * @type integer
    * @default 0
    */
@@ -551,7 +552,7 @@ that all of your HTML imports are concatenated into one file.__
    *         Select Files
    *     </file-input>
    *
-   * @attribute maxSize & minSize
+   * @property maxSize & minSize
    * @type integer
    * @default 0
    */
