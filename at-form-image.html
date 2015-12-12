@@ -43,13 +43,17 @@
     .hidden {
       display: none;
     }
+
+    #atFormImageWrapper > .ui.form > .labelContainer > .labelContent {
+      font-weight: bold;
+    }
   </style>
   <template>
     <at-core-theme></at-core-theme>
     <div id="atFormImageWrapper">
       <div class="ui form">
-        <div class="" id="labelContainer">
-          <label>{{label}}</label>
+        <div class="labelContainer" id="labelContainer">
+          <label class="labelContent">{{label}}</label>
         </div>
         <div id="fileDiv" class="field">
           <div class="vertical layout">
