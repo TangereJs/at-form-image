@@ -2,7 +2,7 @@
 <link rel="import" href="../at-core-theme/at-core-theme.html" />
 <link rel="import" href="../layout/layout.html" />
 <link rel="import" href="../at-carbon-icon/at-carbon-icon.html" />
-
+<link rel="import" href="../at-form-behaviors/at-form-behaviors-validation.html">
 <!--
 @element at-form-image
 @homepage index.html
@@ -37,25 +37,62 @@
     }
 
     .remove-button-hidden {
-      visibility: remove-button-hidden;
+      visibility: hidden;
     }
 
     .hidden {
       display: none;
     }
 
-    #atFormImageWrapper > .ui.form > .labelContainer > .labelContent {
+    #atFormImageWrapper > .ui.form > .label-container > .label-content {
       font-weight: bold;
     }
+
+    :host {
+      --error-color: #e41e2b;
+    }
+
+    .label-container {
+      color: #000000;
+    }
+
+    .label-container.error {
+      color: var(--error-color);
+    }
+
+    .hint-container.error {
+      color: var(--error-color);
+    }
+
+    #contentContainer.field {
+      margin: 0;
+    }
+
+    #contentContainer.field.error {
+      margin: 0 0 2px;
+    }
+
+    #contentContainer.field > div > .ui.action > .ui.button {
+      border-color: var(--error-color);
+    }
+
+    #contentContainer.field.error .buttonText {
+      color: var(--error-color);
+    }
+
+    #contentContainer.field.error .icon {
+      color: var(--error-color);
+    }
+
   </style>
   <template>
     <at-core-theme></at-core-theme>
     <div id="atFormImageWrapper">
       <div class="ui form">
-        <div class="labelContainer" id="labelContainer">
-          <label class="labelContent">{{label}}</label>
+        <div id="labelContainer" class="label-container">
+          <label class="label-content">{{label}}</label>
         </div>
-        <div id="fileDiv" class="field">
+        <div id="contentContainer" class="field">
           <div class="vertical layout">
             <div class="horizontal layout">
               <div id="imagePreview" class="imagePreview"></div>
@@ -72,6 +109,9 @@
             </div>
           </div>
         </div>
+        <div id="hintContainer" class="hint-container">
+          <p id="errorHtml" class="hint"></p>
+        </div>
       </div>
       <input style="display: none" accept$="{{accept}}" id="fileInputInput" on-change="changeHandler" type="file" />
     </div>
@@ -80,6 +120,7 @@
 <script>
   Polymer({
     is: 'at-form-image',
+    behaviors: [AtFormBehaviors.AtFormBehaviorsValidation],
     properties: {
       /**
        * Label for the element
@@ -145,8 +186,9 @@
        * @default ''
        */
       directory: {
-        type: String,
-        value: ''
+        type: Boolean,
+        value: false,
+        observer: 'directoryChanged'
       },
       /**
        * This is a validation property that allows you to filter out any
@@ -187,7 +229,8 @@
        */
       maxFiles: {
         type: Number,
-        value: 0
+        value: 0,
+        observer: 'maxFilesChanged'
       },
       /**
        * Maximum acceptable file size for the purposes of validation.
@@ -232,17 +275,6 @@
         readOnly: true
       },
       /**
-       * Valid state of the element; true = valid, false = invalid
-       * @property valid
-       * @type Boolean
-       * @default true
-       */
-      valid: {
-        type: Boolean,
-        value: true,
-        readOnly: true
-      },
-      /**
        * Required state of the element; true = required, false = optional
        * @property required
        * @type Boolean
@@ -250,7 +282,8 @@
        */
       required: {
         type: Boolean,
-        value: false
+        value: false,
+        observer: 'requiredChanged'
       },
       /**
        * Disabled state of the element; true = disabled, false = enabled
@@ -281,32 +314,38 @@
       xtype: "image"
     }],
     _scopeCssViaAttr: true,
-    _isReady: false,
-    hideLabelChanged: function(newValue, oldValue) {
-      this.toggleClass("hidden", newValue, this.$.labelContainer);
+
+    ready: function() {
+      this._isReady = false;
+
+      this._validationFunctions.push(this._validateInternalConstraints.bind(this));
+
+      if (this.maxFiles > 1) {
+        this.$.fileInputInput.setAttribute("multiple", "");
+      }
+
+      if (this.directory && this.$.fileInputInput.webkitdirectory !== undefined) {
+        this.$.fileInputInput.setAttribute("webkitdirectory", "");
+      }
+
+      var newValue = {
+        invalid: {
+          count: 0
+        },
+        valid: []
+      };
+      this._setValue(newValue);
+
+      this._isReady = true;
     },
-    hideChanged: function (newValue, oldValue) {
-      var wrapper = this.$.atFormImageWrapper;
-      this.toggleClass('hidden', newValue, wrapper);
-    },
+
     selectFileClickHandler: function() {
       var clickEvent = document.createEvent('MouseEvent');
       clickEvent.initEvent('click', false, false);
       this.$.fileInputInput.dispatchEvent(clickEvent);
     },
 
-    removeFileClickHandler: function() {
-      this.$.buttonText.textContent = 'Select a file';
-      this.toggleClass('remove-button-hidden', true, this.$.removeButtonDiv);
-      this.$.imagePreview.removeChild(this.$.imagePreview.children[0]);
-      this.$.fileInputInput.value = '';
-      this._setValue({
-        invalid: {
-          count: 0
-        },
-        valid: []
-      });
-    },
+    set value(newValue) {},
 
     changeHandler: function() {
       var files = Array.prototype.slice.call(this.$.fileInputInput.files),
@@ -368,55 +407,116 @@
       this.validate();
     },
 
-    created: function() {},
-
-    ready: function() {
-      if (this.maxFiles > 1) {
-        this.$.fileInputInput.setAttribute("multiple", "");
-      }
-
-      if (this.directory && this.$.fileInputInput.webkitdirectory !== undefined) {
-        this.$.fileInputInput.setAttribute("webkitdirectory", "");
-      }
-
-      var newValue = {
+    removeFileClickHandler: function() {
+      this.$.buttonText.textContent = 'Select a file';
+      this.toggleClass('remove-button-hidden', true, this.$.removeButtonDiv);
+      this.$.imagePreview.removeChild(this.$.imagePreview.children[0]);
+      this.$.fileInputInput.value = '';
+      this._setValue({
         invalid: {
           count: 0
         },
         valid: []
-      };
-      this._setValue(newValue);
-
-      this._isReady = true;
+      });
     },
 
-    _updateValidState: function() {
-      // && this.value ; added this to guard against error that happens when element is validated without first selecting a file
-      if (this.required) {
-        this._setValid(this.value.valid.length > 0);
-      } else {
-        this._setValid(true);
+    hideLabelChanged: function(newValue, oldValue) {
+      this.toggleClass("hidden", newValue, this.$.labelContainer);
+    },
+
+    hideChanged: function (newValue, oldValue) {
+      var wrapper = this.$.atFormImageWrapper;
+      this.toggleClass('hidden', newValue, wrapper);
+      if (this._isReady) {
+        this.validate();
       }
     },
 
-    validate: function() {
-      this._updateValidState();
+    requiredChanged: function (newValue, oldValue) {
+      if (this._isReady) {
+        this.validate();
+      }
+    },
 
-      this.toggleClass('error', !this.valid, this.$.fileDiv);
+    disabledChanged: function(newValue, oldValue) {
+      this.toggleClass('disabled', newValue, this.$.buttonDiv);
+      this.toggleClass('disabled', newValue, this.$.removeButtonDiv);
+      if (this._isReady) {
+        this.validate();
+      }
+    },
 
-      return this.valid;
+    _updateUIValidState: function(isValid) {
+      var labelContainer = this.$.labelContainer;
+      this.toggleClass('error', !isValid, labelContainer);
+      var contentContainer = this.$.contentContainer;
+      this.toggleClass('error', !isValid, contentContainer);
+      var hintContainer = this.$.hintContainer;
+      this.toggleClass('error', hintContainer);
+    },
+
+    _checkRequired: function (value) {
+      // coerce this.required to boolean; if element doesn't have required property,
+      // undefined is coerced to false so final result will be valid = true
+      var required = Boolean(this.required);
+      var valid = !required || (value != undefined && value.valid && value.valid.length > 0);
+      // set the _errorMessage when constraint is not satisfied
+      if (!valid) {
+        this._errorMessage = "This field is required.";
+      }
+      // return result;
+      return valid;
+    },
+
+    _validateInternalConstraints: function (value) {
+      var result = true;
+
+      result = result && value.invalid.count === 0;
+
+      if (!result) {
+        this._errorMessage = 'Value is invalid';
+      }
+
+      return result;
     },
 
     /**
-     * To reset the `files` and `invalidFiles` cache on your element,
-     * use the `reset()` function:
-     *
-     *     document.querySelector("file-input").reset();
-     *
-     * @method reset
-     */
+    * To reset the `files` and `invalidFiles` cache on your element,
+    * use the `reset()` function:
+    *
+    *     document.querySelector("file-input").reset();
+    *
+    * @method reset
+    */
     reset: function() {
       this.created();
+    },
+    created: function() {
+      // *ij* I do not understand the purpose of this function
+    },
+
+    maxFilesChanged: function (newValue, oldValue) {
+      try {
+        var value = Number(newValue);
+        var fileInput = this.$.fileInputInput;
+        if (value > 1) {
+          Polymer.dom(fileInput).setAttribute('multiple', '');
+        } else {
+          Polymer.dom(fileInput).removeAttribute('multiple');
+        }
+      } catch (e) {
+
+      }
+    },
+
+    directoryChanged: function (newValue, oldValue) {
+      var fileInput = this.$.fileInputInput;
+      var isWebKitDirectorySupported = this.$.fileInputInput.webkitdirectory !== undefined;
+      if (isWebKitDirectorySupported && newValue) {
+        Polymer.dom(fileInput).setAttribute('webkitdirectory', '');
+      } else {
+        Polymer.dom(fileInput).removeAttribute('webkitdirectory');
+      }
     },
 
     _getLowerCaseExtension: function(filename) {
@@ -441,15 +541,6 @@
       };
     },
 
-    disabledChanged: function(newValue, oldValue) {
-      this.toggleClass('disabled', this.disabled, this.$.buttonDiv);
-      this.toggleClass('disabled', this.disabled, this.$.removeButtonDiv);
-      if (this.disabled) {
-        this.toggleClass('error', false, this.$.fileDiv);
-      } else {
-        this.toggleClass('error', !this.valid, this.$.fileDiv);
-      }
-    },
 
     _getResultOfExtensionsValidation: function(extensionsStr, files) {
       if (extensionsStr) {
