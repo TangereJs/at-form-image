@@ -98,14 +98,14 @@
               <div id="imagePreview" class="imagePreview"></div>
             </div>
             <div class="horizontal layout center">
-              <div id="buttonDiv" class="ui labeled icon button" on-click="selectFileClickHandler">
+              <button type="button" id="buttonDiv" class="ui labeled icon button" on-click="selectFileClickHandler">
                 <at-carbon-icon id="aciIcon" class="icon" icon="{{icon}}"></at-carbon-icon>
                 <div id="buttonText" class="buttonText">Select a file</div>
-              </div>
-              <div id="removeButtonDiv" class="ui labeled icon button remove-button-hidden" on-click="removeFileClickHandler">
+              </button>
+              <button type="button" id="removeButtonDiv" class="ui labeled icon button remove-button-hidden" on-click="removeFileClickHandler">
                 <at-carbon-icon id="aciIcon" class="icon" icon="cancel"></at-carbon-icon>
-                <div class="buttonText">Remove</div>
-              </div>
+                <span class="buttonText">Remove</span>
+              </button>
             </div>
           </div>
         </div>
