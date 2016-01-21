@@ -339,6 +339,13 @@
       this._isReady = true;
     },
 
+    focus: function () {
+      var selectAFileButton = this.$.buttonText;
+      if (selectAFileButton.focus) {
+        selectAFileButton.focus();
+      }
+    },
+
     selectFileClickHandler: function() {
       var clickEvent = document.createEvent('MouseEvent');
       clickEvent.initEvent('click', false, false);
