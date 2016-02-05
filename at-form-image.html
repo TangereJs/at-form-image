@@ -1,6 +1,5 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../at-core-theme/at-core-theme.html" />
-<link rel="import" href="../layout/layout.html" />
+<link rel="import" href="../at-theme/at-theme.html" />
 <link rel="import" href="../at-carbon-icon/at-carbon-icon.html" />
 <link rel="import" href="../at-form-behaviors/at-form-behaviors-validation.html">
 <!--
@@ -9,109 +8,145 @@
 -->
 
 <dom-module id="at-form-image">
-  <style>
-    :host {
-      position: relative;
-    }
-
-    .buttonText {
-      vertical-align: middle;
-      white-space: normal;
-      padding-left: 6px;
-      padding-right: 6px;
-    }
-
-    .previewImage {
-      vertical-align: middle;
-      height: auto;
-      max-width: 100%;
-      max-height: 100%;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .imagePreview {
-      width: 250px;
-      height: 150px;
-    }
-
-    .remove-button-hidden {
-      visibility: hidden;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    #atFormImageWrapper > .ui.form > .label-container > .label-content {
-      font-weight: bold;
-    }
-
-    :host {
-      --error-color: #e41e2b;
-    }
-
-    .label-container {
-      color: #000000;
-    }
-
-    .label-container.error {
-      color: var(--error-color);
-    }
-
-    .hint-container.error {
-      color: var(--error-color);
-    }
-
-    #contentContainer.field {
-      margin: 0;
-    }
-
-    #contentContainer.field.error {
-      margin: 0 0 2px;
-    }
-
-    #contentContainer.field > div > .ui.action > .ui.button {
-      border-color: var(--error-color);
-    }
-
-    #contentContainer.field.error .buttonText {
-      color: var(--error-color);
-    }
-
-    #contentContainer.field.error .icon {
-      color: var(--error-color);
-    }
-
-  </style>
   <template>
-    <at-core-theme></at-core-theme>
-    <div id="atFormImageWrapper">
-      <div class="ui form">
-        <div id="labelContainer" class="label-container">
-          <label class="label-content">{{label}}</label>
-        </div>
-        <div id="contentContainer" class="field">
-          <div class="vertical layout">
-            <div class="horizontal layout">
-              <div id="imagePreview" class="imagePreview"></div>
-            </div>
-            <div class="horizontal layout center">
-              <button type="button" id="buttonDiv" class="ui labeled icon button" on-click="selectFileClickHandler">
-                <at-carbon-icon id="aciIcon" class="icon" icon="{{icon}}"></at-carbon-icon>
-                <div id="buttonText" class="buttonText">Select a file</div>
-              </button>
-              <button type="button" id="removeButtonDiv" class="ui labeled icon button remove-button-hidden" on-click="removeFileClickHandler">
-                <at-carbon-icon id="aciIcon" class="icon" icon="cancel"></at-carbon-icon>
-                <span class="buttonText">Remove</span>
-              </button>
-            </div>
+    <style>
+      :host * {
+        box-sizing: border-box;
+      }
+
+      :host {
+        @apply(--at-form-host);
+      }
+
+      #fileName {
+        @apply(--at-form-input-common);
+      }
+
+      #fileName:focus {
+        @apply(--at-form-input-focus);
+      }
+
+      #fileName::-webkit-input-placeholder {
+        @apply(--at-form-input-placeholder);
+      }
+
+      #fileName:-moz-placeholder {
+        /* Mozilla Firefox 4 to 18 */
+        @apply(--at-form-input-placeholder);
+      }
+
+      #fileName::-moz-placeholder {
+        /* Mozilla Firefox 19+ */
+        @apply(--at-form-input-placeholder);
+      }
+
+      #fileName:-ms-input-placeholder {
+        /* Internet Explorer 10-11 */
+        @apply(--at-form-input-placeholder);
+      }
+
+      #contentContainer.error #fileName::-webkit-input-placeholder {
+        @apply(--at-form-input-placeholder-error);
+      }
+
+      #contentContainer.error #fileName:-moz-placeholder {
+        /* Mozilla Firefox 4 to 18 */
+        @apply(--at-form-input-placeholder-error);
+        opacity: 1;
+      }
+
+      #contentContainer.error #fileName::-moz-placeholder {
+        /* Mozilla Firefox 19+ */
+        @apply(--at-form-input-placeholder-error);
+        opacity: 1;
+      }
+
+      #contentContainer.error #fileName:-ms-input-placeholder {
+        /* Internet Explorer 10-11 */
+        @apply(--at-form-input-placeholder-error);
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .error {
+        color: var(--at-error-color);
+      }
+
+      .disabled {
+        @apply(--at-form-disabled);
+      }
+
+      #atContainer {
+        @apply(--at-form-element);
+      }
+
+      #label {
+        @apply(--at-form-label);
+      }
+
+      #contentContainer {
+        @apply(--layout-vertical);
+      }
+
+      #contentContainer.error {
+        @apply(--at-form-error-margins);
+      }
+
+      #contentContainer.error #fileName {
+        @apply(--at-form-content-error);
+      }
+
+      #errorHtml {
+        @apply(--at-form-error-font);
+      }
+
+      #buttonContainer {
+        @apply(--layout-horizontal);
+      }
+
+      .at-form-button {
+        @apply(--layout-horizontal);
+        @apply(--at-form-input-padding);
+        @apply(--at-form-button);
+        margin: 0 2px;
+      }
+
+      .at-form-button.hidden {
+        display: none;
+      }
+
+      .at-form-button .button-icon {
+        align-self: center;
+      }
+
+      .at-form-button .button-text {
+        align-self: center;
+        margin-left: 2px;
+      }
+    </style>
+    <div id="atContainer">
+      <div id="labelContainer">
+        <label id="label">{{label}}</label>
+      </div>
+      <div id="contentContainer">
+        <div id="imagePreview" class="imagePreview"></div>
+        <div id="buttonContainer">
+          <button type="button" id="selectFileButton" class="at-form-button" on-click="selectFileClickHandler" disabled$="{{disabled}}">
+            <at-carbon-icon class="button-icon" icon="{{icon}}"></at-carbon-icon>
+            <div id="buttonText" class="button-text">Select an image</div>
+          </button>
+          <div id="clearButtonContainer" class="hidden">
+            <button type="button" id="clearButton" class="at-form-button" on-click="removeFileClickHandler" disabled$="{{disabled}}">
+              <at-carbon-icon class="button-icon" icon="cancel"></at-carbon-icon>
+              <span class="button-text">Remove</span>
+            </button>
           </div>
         </div>
-        <div id="hintContainer" class="hint-container">
-          <p id="errorHtml" class="hint"></p>
-        </div>
+      </div>
+      <div id="hintContainer" class="hint-container">
+        <div id="errorHtml" class="hint"></div>
       </div>
       <input style="display: none" accept$="{{accept}}" id="fileInputInput" on-change="changeHandler" type="file" />
     </div>
@@ -313,8 +348,6 @@
       type: "string",
       xtype: "image"
     }],
-    _scopeCssViaAttr: true,
-
     ready: function() {
       this._isReady = false;
 
@@ -339,7 +372,7 @@
       this._isReady = true;
     },
 
-    focus: function () {
+    focus: function() {
       var selectAFileButton = this.$.buttonText;
       if (selectAFileButton.focus) {
         selectAFileButton.focus();
@@ -393,7 +426,7 @@
       if (this.value.valid.length > 0) {
         var selectedFile = this.value.valid[0];
         this.$.buttonText.textContent = 'Change';
-        this.toggleClass('remove-button-hidden', false, this.$.removeButtonDiv);
+        this.toggleClass('hidden', false, this.$.clearButtonContainer);
 
         var fileReader = new FileReader();
         var self = this;
@@ -416,7 +449,7 @@
 
     removeFileClickHandler: function() {
       this.$.buttonText.textContent = 'Select a file';
-      this.toggleClass('remove-button-hidden', true, this.$.removeButtonDiv);
+      this.toggleClass('hidden', true, this.$.clearButtonContainer);
       this.$.imagePreview.removeChild(this.$.imagePreview.children[0]);
       this.$.fileInputInput.value = '';
       this._setValue({
@@ -431,23 +464,25 @@
       this.toggleClass("hidden", newValue, this.$.labelContainer);
     },
 
-    hideChanged: function (newValue, oldValue) {
-      var wrapper = this.$.atFormImageWrapper;
+    hideChanged: function(newValue, oldValue) {
+      var wrapper = this.$.atContainer;
       this.toggleClass('hidden', newValue, wrapper);
       if (this._isReady) {
         this.validate();
       }
     },
 
-    requiredChanged: function (newValue, oldValue) {
+    requiredChanged: function(newValue, oldValue) {
       if (this._isReady) {
         this.validate();
       }
     },
 
     disabledChanged: function(newValue, oldValue) {
-      this.toggleClass('disabled', newValue, this.$.buttonDiv);
-      this.toggleClass('disabled', newValue, this.$.removeButtonDiv);
+      this.toggleClass('disabled', newValue, this.$.selectFileButton);
+      this.toggleClass('disabled', newValue, this.$.clearButton);
+      var container = this.$.atContainer;
+      this.toggleClass('disabled', newValue, container);
       if (this._isReady) {
         this.validate();
       }
@@ -459,10 +494,10 @@
       var contentContainer = this.$.contentContainer;
       this.toggleClass('error', !isValid, contentContainer);
       var hintContainer = this.$.hintContainer;
-      this.toggleClass('error', hintContainer);
+      this.toggleClass('error', !isValid, hintContainer);
     },
 
-    _checkRequired: function (value) {
+    _checkRequired: function(value) {
       // coerce this.required to boolean; if element doesn't have required property,
       // undefined is coerced to false so final result will be valid = true
       var required = Boolean(this.required);
@@ -475,7 +510,7 @@
       return valid;
     },
 
-    _validateInternalConstraints: function (value) {
+    _validateInternalConstraints: function(value) {
       var result = true;
 
       result = result && value.invalid.count === 0;
@@ -488,13 +523,13 @@
     },
 
     /**
-    * To reset the `files` and `invalidFiles` cache on your element,
-    * use the `reset()` function:
-    *
-    *     document.querySelector("file-input").reset();
-    *
-    * @method reset
-    */
+     * To reset the `files` and `invalidFiles` cache on your element,
+     * use the `reset()` function:
+     *
+     *     document.querySelector("file-input").reset();
+     *
+     * @method reset
+     */
     reset: function() {
       this.created();
     },
@@ -502,7 +537,7 @@
       // *ij* I do not understand the purpose of this function
     },
 
-    maxFilesChanged: function (newValue, oldValue) {
+    maxFilesChanged: function(newValue, oldValue) {
       try {
         var value = Number(newValue);
         var fileInput = this.$.fileInputInput;
@@ -516,7 +551,7 @@
       }
     },
 
-    directoryChanged: function (newValue, oldValue) {
+    directoryChanged: function(newValue, oldValue) {
       var fileInput = this.$.fileInputInput;
       var isWebKitDirectorySupported = this.$.fileInputInput.webkitdirectory !== undefined;
       if (isWebKitDirectorySupported && newValue) {
