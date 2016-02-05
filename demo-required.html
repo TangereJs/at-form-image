@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>at-form-image demo</title>
+
+  <script src="../webcomponentsjs/webcomponents.js"></script>
+  <link rel="import" href="at-form-image.html">
+
+  <!--Only used by the demo to add common bootstrap button styles to the file chooser-->
+  <!--  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">-->
+
+  <style>
+    .pre {
+      white-space: pre;
+      unicode-bidi: embed;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Easily style a file chooser and set restrictions:</h1>
+
+  <p>See the code for this demo in the <a href="https://github.com/garstasio/file-input/tree/gh-pages/components/file-input/demo.html">demo.html file</a> of the <a href="https://github.com/garstasio/file-input">file-input GitHub repository</a>.</p>
+
+  <h3>This is required demo</h3>
+  <p>Field is required. Clicking submit will validate the field. If no files are selected, fields label will go red. Selecting a valid file and clicking submit again will validate the field again. Field label will not be red again.</p>
+
+  <at-form-image id="requiredFile" required label="Required field" class="btn btn-primary" extensions='["jpeg", "jpg"]' min-size="500000" max-size="3000000" icon="folder-open">
+    Select a file
+  </at-form-image>
+
+  <div>
+    <br/>
+    <p>We've restricted files to those with a "jpeg" or jpg" extension. Files also must be between 500 kB and 3 MB in size.</p>
+  </div>
+
+  <h3>valid selected files:</h3>
+  <div id="validFiles">
+    No files selected.
+  </div>
+
+  <h3>invalid selected files:</h3>
+  <div id="invalidFiles">
+    No files selected.
+  </div>
+
+  <div>
+    <button id="submit">Submit</button>
+  </div>
+
+
+  <div>
+    <h4>This is disabled required demo</h4>
+    <at-form-image disabled required label="Disabled and required field" class="btn btn-primary" extensions='["jpeg", "jpg"]' minSize="500000" maxSize="3000000">
+      <span class="glyphicon glyphicon-file"></span> Select a file
+    </at-form-image>
+  </div>
+</body>
+
+<script>
+  document.addEventListener('WebComponentsReady', function () {
+
+    var requiredFile = document.getElementById('requiredFile');
+
+    requiredFile.addEventListener('value-changed', function (event) {
+      var valid = event.detail.value.valid,
+        invalid = event.detail.value.invalid,
+        validFilesEl = document.getElementById('validFiles'),
+        validFiles = [],
+        invalidFilesEl = document.getElementById('invalidFiles'),
+        invalidFiles = {};
+
+      if (valid.length) {
+        validFiles = valid.map(function (file) {
+          return {
+            name: file.name,
+            size: file.size
+          };
+        });
+        validFilesEl.className = 'pre'
+        validFilesEl.innerHTML = JSON.stringify(validFiles, null, 3);
+      } else {
+        validFilesEl.className = ''
+        validFilesEl.innerHTML = 'No valid files.';
+      }
+
+      if (invalid.count) {
+        Object.keys(invalid).forEach(function (key) {
+          if (key !== 'count') {
+            invalidFiles[key] = invalid[key].map(function (file) {
+              return {
+                name: file.name,
+                size: file.size
+              };
+            });
+          }
+        });
+        invalidFilesEl.className = 'pre'
+        invalidFilesEl.innerHTML = JSON.stringify(invalidFiles, null, 3);
+      } else {
+        invalidFilesEl.className = ''
+        invalidFilesEl.innerHTML = 'No invalid files.';
+      }
+    });
+
+    var submit = document.getElementById('submit');
+    submit.addEventListener('click', function (e) {
+      requiredFile.validate();
+    });
+  });
+</script>
+
+</html>
