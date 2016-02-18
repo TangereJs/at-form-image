@@ -221,6 +221,14 @@
         },
         readOnly: true
       },
+
+      files: {
+        type: Array,
+        value: function () {
+          return [];
+        },
+        readOnly: true
+      },
       /**
        * Required state of the element; true = required, false = optional
        * @property required
@@ -299,7 +307,7 @@
     },
 
     set value(newValue) {},
-
+    set files(newValue) {},
     changeHandler: function() {
       var files = Array.prototype.slice.call(this.$.fileInputInput.files),
         invalid = {
@@ -328,17 +336,21 @@
         invalid.count += countLimitValidationResult.invalid.length;
       }
 
-      valid = countLimitValidationResult.valid;
+      var files = countLimitValidationResult.valid;
+      this._setFiles(files);
+      valid = [];
+      files.forEach(function (file) {
+        valid.push(file.name);
+      });
 
       var newValue = {
         invalid: invalid,
         valid: valid
       };
       this._setValue(newValue);
-      this.fire('value-changed', { value: this.value });
 
       if (this.value.valid.length > 0) {
-        var selectedFile = this.value.valid[0];
+        var selectedFile = this.files[0];
         this.$.buttonText.textContent = 'Change';
         this.toggleClass('hidden', false, this.$.clearButtonContainer);
 
@@ -360,6 +372,7 @@
         } catch (e) {}
       }
       this.validate();
+      this.fire('value-changed', { value: this.value });
     },
 
     removeFileClickHandler: function() {
