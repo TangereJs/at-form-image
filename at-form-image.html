@@ -1,4 +1,5 @@
-<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../tangere/Tangere.html">
+<link rel="import" href="../at-i18n/at-i18n-behavior.html">
 <link rel="import" href="../at-theme/at-theme.html" />
 <link rel="import" href="../at-carbon-icon/at-carbon-icon.html" />
 <link rel="import" href="../at-form-behaviors/at-form-behaviors-validation.html">
@@ -68,7 +69,7 @@
 <script>
   Polymer({
     is: 'at-form-image',
-    behaviors: [AtFormBehaviors.AtFormBehaviorsValidation],
+    behaviors: [ Tangere.behaviors.formValidation, Tangere.behaviors.i18n ],
     properties: {
       /**
        * Label for the element
@@ -432,7 +433,7 @@
       var valid = !required || (value != undefined && value.valid && value.valid.length > 0);
       // set the _errorMessage when constraint is not satisfied
       if (!valid) {
-        this._errorMessage = "This field is required.";
+        this._errorMessage = this.T("This field is required.");
       }
       // return result;
       return valid;
