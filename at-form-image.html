@@ -33,6 +33,15 @@
         @apply(--at-form-input-padding);
         @apply(--at-form-button);
         margin: 0 2px;
+        outline: none;
+      }
+
+      .at-form-button:focus {
+        outline: none;
+      }
+
+      .at-form-button:hover {
+        @apply(--shadow-elevation-2dp);
       }
 
       .at-form-button .button-icon {
@@ -228,7 +237,8 @@
         value: function () {
           return [];
         },
-        readOnly: true
+        readOnly: true,
+        xtype: "json"
       },
       /**
        * Required state of the element; true = required, false = optional
