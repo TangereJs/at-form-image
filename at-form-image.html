@@ -1,7 +1,9 @@
-<link rel="import" href="../tangere/Tangere.html">
+<link rel="import" href="../tangere/tangere.html">
 <link rel="import" href="../at-i18n/at-i18n-behavior.html">
-<link rel="import" href="../at-theme/at-theme.html" />
-<link rel="import" href="../at-carbon-icon/at-carbon-icon.html" />
+<link rel="import" href="../at-theme/at-theme.html">
+<link rel="import" href="../at-carbon-button/at-carbon-button.html">
+<link rel="import" href="../at-carbon-icon-button/at-carbon-icon-button.html">
+<link rel="import" href="../iron-label/iron-label.html">
 <link rel="import" href="../at-form-behaviors/at-form-behaviors-validation.html">
 <!--
 @element at-form-image
@@ -15,8 +17,7 @@
       :host * {
         box-sizing: border-box;
       }
-
-      :host {
+       :host {
         @apply(--at-form-host);
       }
 
@@ -24,61 +25,52 @@
         @apply(--layout-vertical);
       }
 
-      #buttonContainer {
-        @apply(--layout-horizontal);
-      }
-
-      .at-form-button {
-        @apply(--layout-horizontal);
+      .at-button {
         @apply(--at-form-input-padding);
         @apply(--at-form-button);
         margin: 0 2px;
         outline: none;
       }
-
-      .at-form-button:focus {
+      .at-button:focus {
         outline: none;
       }
 
-      .at-form-button:hover {
-        @apply(--shadow-elevation-2dp);
+      .at-button .at-button-icon {
+        vertical-align: middle;
       }
 
-      .at-form-button .button-icon {
-        align-self: center;
-      }
-
-      .at-form-button .button-text {
-        align-self: center;
+      .at-button .at-button-label {
+        vertical-align: middle;
         margin-left: 2px;
       }
+
     </style>
     <div id="atContainer" class="at-container">
-      <label id="label">{{label}}</label>
+      <label id="label">{{_getLocalized(label)}}</label>
       <div id="contentContainer" class="at-content-container">
         <div id="imagePreview" class="imagePreview"></div>
-        <div id="buttonContainer">
-          <button type="button" id="selectFileButton" class="at-form-button input-group-addon" on-click="selectFileClickHandler" disabled$="{{disabled}}">
-            <at-carbon-icon class="button-icon" icon="{{icon}}"></at-carbon-icon>
-            <div id="buttonText" class="button-text">Select an image</div>
-          </button>
-          <div id="clearButtonContainer" class="hidden">
-            <button type="button" id="clearButton" class="at-form-button input-group-addon" on-click="removeFileClickHandler" disabled$="{{disabled}}">
-              <at-carbon-icon class="button-icon" icon="cancel"></at-carbon-icon>
-              <span class="button-text">Remove</span>
-            </button>
-          </div>
+        <div>
+          <at-carbon-button id="selectFileButton" on-click="selectFileClickHandler" disabled$="{{disabled}}" class="at-button">
+            <at-carbon-icon-button icon="{{icon}}" class="at-button-icon"></at-carbon-icon-button>
+            <iron-label id="selectButtonText" class="at-button-label">{{_getLocalized("Select an image")}}</iron-label>
+          </at-carbon-button>
+          <at-carbon-button id="clearButton" on-click="removeFileClickHandler" disabled$="{{disabled}}" class="at-button hidden">
+            <at-carbon-icon-button icon="cancel" class="at-button-icon"></at-carbon-icon-button>
+            <iron-label class="at-button-label">{{_getLocalized("Remove")}}</iron-label>
+          </at-carbon-button>
         </div>
       </div>
       <div id="hint"></div>
-      <input style="display: none" accept$="{{accept}}" id="fileInputInput" on-change="changeHandler" type="file" />
+      <input style="display: none" accept$="{{accept}}" id="fileInputInput" on-change="changeHandler" type="file"/>
     </div>
   </template>
 </dom-module>
 <script>
   Polymer({
     is: 'at-form-image',
-    behaviors: [ Tangere.behaviors.formValidation, Tangere.behaviors.i18n ],
+    behaviors: [
+      Tangere.behaviors.formValidation, Tangere.behaviors.i18n
+    ],
     properties: {
       /**
        * Label for the element
@@ -274,12 +266,17 @@
         observer: 'hideChanged'
       }
     },
-    $meta: [{
-      title: "Image",
-      type: "string",
-      xtype: "image"
-    }],
-    ready: function() {
+    $meta: [
+      {
+        title: "Image",
+        type: "string",
+        xtype: "image"
+      }
+    ],
+    _getLocalized: function (title) {
+      return this.T(title);
+    },
+    ready: function () {
       this._isReady = false;
 
       this._validationFunctions.push(this._validateInternalConstraints.bind(this));
@@ -299,19 +296,19 @@
         valid: []
       };
       this._setValue(newValue);
-      this.fire('value-changed', { value: this.value });
+      this.fire('value-changed', {value: this.value});
 
       this._isReady = true;
     },
 
-    focus: function() {
-      var selectAFileButton = this.$.buttonText;
+    focus: function () {
+      var selectAFileButton = this.$.selectButtonText;
       if (selectAFileButton.focus) {
         selectAFileButton.focus();
       }
     },
 
-    selectFileClickHandler: function() {
+    selectFileClickHandler: function () {
       var clickEvent = document.createEvent('MouseEvent');
       clickEvent.initEvent('click', false, false);
       this.$.fileInputInput.dispatchEvent(clickEvent);
@@ -319,7 +316,7 @@
 
     set value(newValue) {},
     set files(newValue) {},
-    changeHandler: function() {
+    changeHandler: function () {
       var files = Array.prototype.slice.call(this.$.fileInputInput.files),
         invalid = {
           count: 0
@@ -362,13 +359,13 @@
 
       if (this.value.valid.length > 0) {
         var selectedFile = this.files[0];
-        this.$.buttonText.textContent = 'Change';
-        this.toggleClass('hidden', false, this.$.clearButtonContainer);
+        this.$.selectButtonText.textContent = this._getLocalized('Change');
+        this.toggleClass('hidden', false, this.$.clearButton);
 
         var fileReader = new FileReader();
         var self = this;
         Polymer.dom(this.$.imagePreview).innerHTML = '';
-        fileReader.onload = function(event) {
+        fileReader.onload = function (event) {
           var newImage = document.createElement('img');
           newImage.classList.add('previewImage');
           newImage.setAttribute('style-scope', 'at-form-image');
@@ -383,13 +380,13 @@
         } catch (e) {}
       }
       this.validate();
-      this.fire('value-changed', { value: this.value });
+      this.fire('value-changed', {value: this.value});
     },
 
-    removeFileClickHandler: function() {
+    removeFileClickHandler: function () {
 
-      this.$.buttonText.textContent = 'Select an image';
-      this.toggleClass('hidden', true, this.$.clearButtonContainer);
+      this.$.selectButtonText.textContent = this.T('Select an image');
+      this.toggleClass('hidden', true, this.$.clearButton);
       this.$.imagePreview.removeChild(this.$.imagePreview.children[0]);
       this.$.fileInputInput.value = '';
       this._setValue({
@@ -398,14 +395,14 @@
         },
         valid: []
       });
-      this.fire('value-changed', { value: this.value });
+      this.fire('value-changed', {value: this.value});
     },
 
-    hideLabelChanged: function(newValue, oldValue) {
+    hideLabelChanged: function (newValue, oldValue) {
       this.toggleClass("hidden", newValue, this.$.label);
     },
 
-    hideChanged: function(newValue, oldValue) {
+    hideChanged: function (newValue, oldValue) {
       var wrapper = this.$.atContainer;
       this.toggleClass('hidden', newValue, wrapper);
       if (this._isReady) {
@@ -413,13 +410,13 @@
       }
     },
 
-    requiredChanged: function(newValue, oldValue) {
+    requiredChanged: function (newValue, oldValue) {
       if (this._isReady) {
         this.validate();
       }
     },
 
-    disabledChanged: function(newValue, oldValue) {
+    disabledChanged: function (newValue, oldValue) {
       this.toggleClass('disabled', newValue, this.$.selectFileButton);
       this.toggleClass('disabled', newValue, this.$.clearButton);
       var container = this.$.atContainer;
@@ -429,16 +426,15 @@
       }
     },
 
-    _updateUIValidState: function(isValid) {
+    _updateUIValidState: function (isValid) {
       var label = this.$.label;
       this.toggleClass('error', !isValid, label);
       var contentContainer = this.$.contentContainer;
       this.toggleClass('error', !isValid, contentContainer);
     },
 
-    _checkRequired: function(value) {
-      // coerce this.required to boolean; if element doesn't have required property,
-      // undefined is coerced to false so final result will be valid = true
+    _checkRequired: function (value) {
+      // coerce this.required to boolean; if element doesn't have required property, undefined is coerced to false so final result will be valid = true
       var required = Boolean(this.required);
       var valid = !required || (value != undefined && value.valid && value.valid.length > 0);
       // set the _errorMessage when constraint is not satisfied
@@ -449,7 +445,7 @@
       return valid;
     },
 
-    _validateInternalConstraints: function(value) {
+    _validateInternalConstraints: function (value) {
       var result = true;
 
       result = result && value.invalid.count === 0;
@@ -469,14 +465,14 @@
      *
      * @method reset
      */
-    reset: function() {
+    reset: function () {
       this.created();
     },
-    created: function() {
+    created: function () {
       // *ij* I do not understand the purpose of this function
     },
 
-    maxFilesChanged: function(newValue, oldValue) {
+    maxFilesChanged: function (newValue, oldValue) {
       try {
         var value = Number(newValue);
         var fileInput = this.$.fileInputInput;
@@ -485,12 +481,10 @@
         } else {
           Polymer.dom(fileInput).removeAttribute('multiple');
         }
-      } catch (e) {
-
-      }
+      } catch (e) {}
     },
 
-    directoryChanged: function(newValue, oldValue) {
+    directoryChanged: function (newValue, oldValue) {
       var fileInput = this.$.fileInputInput;
       var isWebKitDirectorySupported = this.$.fileInputInput.webkitdirectory !== undefined;
       if (isWebKitDirectorySupported && newValue) {
@@ -500,7 +494,7 @@
       }
     },
 
-    _getLowerCaseExtension: function(filename) {
+    _getLowerCaseExtension: function (filename) {
       var extIdx = filename.lastIndexOf(".") + 1;
 
       if (extIdx > 0) {
@@ -508,7 +502,7 @@
       }
     },
 
-    _getResultOfCountLimitValidation: function(limit, files) {
+    _getResultOfCountLimitValidation: function (limit, files) {
       if (limit > 0 && limit < files.length) {
         return {
           invalid: files.slice(limit, files.length),
@@ -516,56 +510,51 @@
         };
       }
 
-      return {
-        invalid: [],
-        valid: files
-      };
+      return {invalid: [], valid: files};
     },
 
-
-    _getResultOfExtensionsValidation: function(extensionsStr, files) {
+    _getResultOfExtensionsValidation: function (extensionsStr, files) {
       if (extensionsStr) {
         var negate = extensionsStr.charAt(0) === "!",
-          extensions = JSON.parse(extensionsStr.toLowerCase().substr(negate ? 1 : 0)),
+          extensions = JSON.parse(extensionsStr.toLowerCase().substr(negate
+            ? 1
+            : 0)),
           result = {
             invalid: [],
             valid: []
           };
 
         var self = this;
-        files.forEach(function(file) {
+        files.forEach(function (file) {
           var extension = self._getLowerCaseExtension(file.name);
 
           if (extensions.indexOf(extension) >= 0) {
-            result[negate ? "invalid" : "valid"].push(file);
+            result[negate
+                ? "invalid"
+                : "valid"].push(file);
           } else {
-            result[negate ? "valid" : "invalid"].push(file);
+            result[negate
+                ? "valid"
+                : "invalid"].push(file);
           }
         });
 
         return result;
       }
 
-      return {
-        invalid: [],
-        valid: files
-      };
+      return {invalid: [], valid: files};
     },
 
-    _getResultOfSizeValidation: function(minSize, maxSize, files) {
+    _getResultOfSizeValidation: function (minSize, maxSize, files) {
       if (!minSize && !maxSize) {
-        return {
-          tooBig: [],
-          tooSmall: [],
-          valid: files
-        };
+        return {tooBig: [], tooSmall: [], valid: files};
       }
 
       var valid = [],
         tooBig = [],
         tooSmall = [];
 
-      files.forEach(function(file) {
+      files.forEach(function (file) {
         if (minSize && file.size < minSize) {
           tooSmall.push(file);
         } else if (maxSize && file.size > maxSize) {
@@ -575,18 +564,11 @@
         }
       });
 
-      return {
-        tooBig: tooBig,
-        tooSmall: tooSmall,
-        valid: valid
-      };
+      return {tooBig: tooBig, tooSmall: tooSmall, valid: valid};
     },
 
-    // this function is part of the hint/validation API
-    // hint should be displayed when element gains focus
-    // behavior can not know when element gained focus
-    // but if gived focusable element it can attach to its focus event
-    // it should return focusable element if available or null if focusable element doesn't exist
+    // this function is part of the hint/validation API hint should be displayed when element gains focus behavior can not know when element gained focus but if gived focusable element it can attach to its focus event it should return focusable element
+    // if available or null if focusable element doesn't exist
     _getFocusableElement: function () {
       var focusable = this.$.selectFileButton;
       return focusable;
