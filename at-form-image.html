@@ -87,7 +87,8 @@
        */
       label: {
         type: String,
-        value: 'Select an image'
+        value: 'Select an image',
+        title: 'Label'
       },
       /**
        * Hides the label
@@ -229,7 +230,8 @@
           },
           valid: []
         },
-        readOnly: true
+        readOnly: true,
+        title: 'Value'
       },
 
       files: {
@@ -249,7 +251,8 @@
       required: {
         type: Boolean,
         value: false,
-        observer: 'requiredChanged'
+        observer: 'requiredChanged',
+        title: 'Input requred'
       },
       /**
        * Disabled state of the element; true = disabled, false = enabled
@@ -260,7 +263,8 @@
       disabled: {
         type: Boolean,
         value: false,
-        observer: 'disabledChanged'
+        observer: 'disabledChanged',
+        title: 'Field value can not be changed'
       },
       /**
        * Hides the element. When hidden nothing is displayed for the element
@@ -271,19 +275,15 @@
       hide: {
         type: Boolean,
         value: false,
-        observer: 'hideChanged'
+        observer: 'hideChanged',
+        title: 'Field is invisible'
       }
     },
-    $meta: [
-      {
+    $meta: [{
       title: "Image",
       type: "string",
       xtype: "image"
-      }
-    ],
-    _getLocalized: function (title) {
-      return this.T(title);
-    },
+    }],
     ready: function() {
       this._isReady = false;
 
