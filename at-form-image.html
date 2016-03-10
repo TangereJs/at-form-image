@@ -101,7 +101,8 @@
        */
       icon: {
         type: String,
-        value: 'picture'
+        value: 'picture',
+        title: 'Button icon name'
       },
       /**
        * If you want to restrict the types of files that the file chooser
@@ -115,7 +116,8 @@
        */
       accept: {
         type: String,
-        value: ''
+        value: '',
+        title: 'Allowed file extensions'
       },
       /**
        * Some browsers (currently only Chrome and Opera) allow you to
@@ -182,7 +184,8 @@
       maxFiles: {
         type: Number,
         value: 0,
-        observer: 'maxFilesChanged'
+        observer: 'maxFilesChanged',
+        title: 'Maximum number of files'
       },
       /**
        * Maximum acceptable file size for the purposes of validation.
@@ -194,7 +197,8 @@
        */
       maxSize: {
         type: Number,
-        value: 0
+        value: 0,
+        title: 'Maximum file size (in bytes)'
       },
       /**
        * Minimum acceptable file size for the purposes of validation.
@@ -206,7 +210,8 @@
        */
       minSize: {
         type: Number,
-        value: 0
+        value: 0,
+        title: 'Minimum file size (in bytes)'
       },
       /**
        * Value of the element contains array of valid files and a count of invalid files
