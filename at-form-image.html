@@ -120,31 +120,6 @@
         title: 'Allowed file extensions'
       },
       /**
-       * Some browsers (currently only Chrome and Opera) allow you to
-       * select folders for upload.  To turn on this feature (ignored
-       * if not supported by the UA), just include this property
-       * on the element.
-       *
-       *     <file-input directory>
-       *         Select Files
-       *     </file-input>
-       *
-       * Note: Using this feature may not be a great idea for
-       * large directories (or high-latency file systems) since the UI thread
-       * is blocked while the file tree is parsed.  This is an unfortunate
-       * native implementation detail in the browser.
-       *
-       *
-       * @property directory
-       * @type String
-       * @default ''
-       */
-      directory: {
-        type: Boolean,
-        value: false,
-        observer: 'directoryChanged'
-      },
-      /**
        * This is a validation property that allows you to filter out any
        * files that do not contain a specific extension.  The value of this
        * attribute is a JSON array string, containing all extensions to keep.
@@ -294,10 +269,6 @@
 
       if (this.maxFiles > 1) {
         this.$.fileInputInput.setAttribute("multiple", "");
-      }
-
-      if (this.directory && this.$.fileInputInput.webkitdirectory !== undefined) {
-        this.$.fileInputInput.setAttribute("webkitdirectory", "");
       }
 
       var newValue = {
@@ -493,16 +464,6 @@
           Polymer.dom(fileInput).removeAttribute('multiple');
         }
       } catch (e) {}
-    },
-
-    directoryChanged: function (newValue, oldValue) {
-      var fileInput = this.$.fileInputInput;
-      var isWebKitDirectorySupported = this.$.fileInputInput.webkitdirectory !== undefined;
-      if (isWebKitDirectorySupported && newValue) {
-        Polymer.dom(fileInput).setAttribute('webkitdirectory', '');
-      } else {
-        Polymer.dom(fileInput).removeAttribute('webkitdirectory');
-      }
     },
 
     _getLowerCaseExtension: function (filename) {
