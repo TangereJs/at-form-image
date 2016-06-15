@@ -197,11 +197,13 @@
        */
       value: {
         type: Object,
-        value: {
-          invalid: {
-            count: 0
-          },
-          valid: []
+        value: function () {
+          return {
+            invalid: {
+              count: 0
+            },
+            valid: []
+          };
         },
         readOnly: true,
         title: 'Value'

@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+
+  <title>at-form-image tests</title>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../iron-test-helpers/test-helpers.js"></script>
+  <script src="../../iron-test-helpers/mock-interactions.js"></script>
+
+  <link rel="import" href="../at-form-image.html">
+
+</head>
+<body>
+
+  <test-fixture id="accept">
+    <template>
+      <at-form-image></at-form-image>
+    </template>
+  </test-fixture>
+
+  <test-fixture id="extensions">
+    <template>
+      <at-form-image></at-form-image>
+    </template>
+  </test-fixture>
+
+  <test-fixture id="maxFiles">
+    <template>
+      <at-form-image></at-form-image>
+    </template>
+  </test-fixture>
+
+  <test-fixture id="minMaxSize">
+    <template>
+      <at-form-image></at-form-image>
+    </template>
+  </test-fixture>
+
+  <script>
+
+    suite('basic', function() {
+
+      test('Test for at-form-image accept', function() {
+        var input = fixture('accept');
+        var acceptValue ='".jpeg,.jpg"';
+        var expectedValue= '".jpeg,.jpg"';
+        input.accept = acceptValue;
+
+        assert.equal(input.accept, expectedValue, 'at-form-image.accept is not set correctly');
+        // this test can not do anything more because reference to File select dialog is not available
+      });
+
+      test('Test for at-form-image extensions', function() {
+        var input = fixture('extensions');
+        var extensions =  '[".jpeg",".jpg"]';
+        var expectedValue = '[".jpeg",".jpg"]';
+        input.extensions = extensions;
+        assert.equal(input.extensions, expectedValue, 'at-form-image.extensions is not set correctly');
+        // this test can not do anything more because <input type="file"> files property is read only.
+        // it can not be set programatically
+      });
+
+      test('Test for at-form-image maxFiles', function() {
+        var input = fixture('maxFiles');
+        var maxFilesValue = 3;
+        var expectedValue= 3;
+        input.maxFiles = maxFilesValue;
+        assert.equal(input.maxFiles, expectedValue, 'at-form-image.maxFiles is not set correctly');
+        // this test can not do anything more because maxFiles validation is done on <input type=file> change event
+        // which can't be triggered programatically
+      });
+
+      test('Test for at-form-image minSize and maxSize', function() {
+        var input = fixture('minMaxSize');
+        var minSizeValue = 1000;
+        var expectedValue = 1000;
+        input.minSize = minSizeValue;
+        assert.equal(input.minSize, expectedValue, 'at-form-image.minSize is not set correctly');
+
+        var maxSizeValue = 1000;
+        expectedValue = 1000;
+        input.maxSize = maxSizeValue;
+        assert.equal(input.maxSize, expectedValue, 'at-form-image.maxSize is not set correctly');
+
+        // this test can not do anything more because minSize/maxSize validation is done on <input type=file> change event
+        // which can't be triggered programatically
+      });
+
+    });
+
+  </script>
+
+</body>
+</html>
