@@ -4,7 +4,8 @@
 <link rel="import" href="../at-carbon-button/at-carbon-button.html">
 <link rel="import" href="../at-carbon-icon-button/at-carbon-icon-button.html">
 <link rel="import" href="../iron-label/iron-label.html">
-<link rel="import" href="../at-form-behaviors/at-form-behaviors-validation.html">
+<link rel="import" href="../at-form-behaviors/at-form-behaviors.html">
+<link rel="import" href="at-form-image-input-validation.html">
 <!--
 @element at-form-image
 @homepage index.html
@@ -50,27 +51,25 @@
       <div id="contentContainer" class="at-content-container">
         <div id="imagePreview" class="imagePreview"></div>
         <div>
-          <at-carbon-button id="selectFileButton" on-click="selectFileClickHandler" disabled$="{{disabled}}" class="at-button">
+          <at-carbon-button id="selectFileButton" on-click="_selectFileClickHandler" disabled$="{{disabled}}" class="at-button">
             <at-carbon-icon-button icon="{{icon}}" class="at-button-icon"></at-carbon-icon-button>
             <iron-label id="selectButtonText" class="at-button-label">{{_getLocalized("Select an image")}}</iron-label>
           </at-carbon-button>
-          <at-carbon-button id="clearButton" on-click="removeFileClickHandler" disabled$="{{disabled}}" class="at-button hidden">
+          <at-carbon-button id="clearButton" on-click="_removeFileClickHandler" disabled$="{{disabled}}" class="at-button hidden">
             <at-carbon-icon-button icon="cancel" class="at-button-icon"></at-carbon-icon-button>
             <iron-label class="at-button-label">{{_getLocalized("Remove")}}</iron-label>
           </at-carbon-button>
         </div>
       </div>
       <div id="hint"></div>
-      <input style="display: none" accept$="{{accept}}" id="fileInputInput" on-change="changeHandler" type="file"/>
+      <input style="display: none" accept$="{{accept}}" id="fileInputInput" on-change="_changeHandler" type="file"/>
     </div>
   </template>
 </dom-module>
 <script>
   Polymer({
     is: 'at-form-image',
-    behaviors: [
-      Tangere.behaviors.formValidation, Tangere.behaviors.i18n
-    ],
+    behaviors: [Tangere.behaviors.i18n, Tangere.behaviors.formUIGeneric, Tangere.behaviors.AtFormImageInputValidation],
     properties: {
       /**
        * Label for the element
@@ -90,9 +89,110 @@
       hideLabel: {
         type: Boolean,
         value: false,
-        observer: 'hideLabelChanged',
+        observer: '_hideLabelChanged',
         title: 'Do not show the label'
       },
+
+      /**
+       * Disabled state of the element; true = disabled, false = enabled
+       * @property disabled
+       * @type Boolean
+       * @default false
+       */
+      disabled: {
+        type: Boolean,
+        value: false,
+        observer: '_disabledChanged',
+        title: 'Field value can not be changed'
+      },
+      /**
+       * Hides the element. When hidden nothing is displayed for the element
+       * @property hide
+       * @type Boolean
+       * @default false
+       */
+      hide: {
+        type: Boolean,
+        value: false,
+        observer: '_hideChanged',
+        title: 'Field is invisible'
+      },
+      /**
+       * Required state of the element; true = required, false = optional
+       * @property required
+       * @type Boolean
+       * @default false
+       */
+      required: {
+        type: Boolean,
+        value: false,
+        title: 'Input required'
+      },
+
+      /**
+       * Value of the element contains array of valid files and a count of invalid files
+       *
+       * @property value
+       * @type Object
+       * @default { invalid: {count: 0}, valid: [] }
+       */
+      value: {
+        type: Object,
+        value: function() {
+          return {
+            invalid: {
+              count: 0
+            },
+            valid: []
+          };
+        },
+        readOnly: true,
+        title: 'Value'
+      },
+
+      /**
+       * Array of javascript File objects so that contents of selected files can be read
+       * @property files
+       * @type Array of javascript File objects
+       * @default []
+       */
+      files: {
+        type: Array,
+        value: function() {
+          return [];
+        },
+        readOnly: true,
+        xtype: "json"
+      },
+
+      /**
+       * Minimum acceptable file size for the purposes of validation.
+       * The value is expected to be in bytes.
+       *
+       * @property minSize
+       * @type Number
+       * @default 0
+       */
+      minSize: {
+        type: Number,
+        value: 0,
+        title: 'Minimum file size (in bytes)'
+      },
+      /**
+       * Maximum acceptable file size for the purposes of validation.
+       * The value is expected to be in bytes.
+       *
+       * @property maxSize
+       * @type Number
+       * @default 0
+       */
+      maxSize: {
+        type: Number,
+        value: 0,
+        title: 'Maximum file size (in bytes)'
+      },
+
+
       /**
        * Name of the icon
        * @property icon
@@ -159,115 +259,31 @@
       maxFiles: {
         type: Number,
         value: 0,
-        observer: 'maxFilesChanged',
+        observer: '_maxFilesChanged',
         title: 'Maximum number of files'
       },
-      /**
-       * Maximum acceptable file size for the purposes of validation.
-       * The value is expected to be in bytes.
-       *
-       * @property maxSize
-       * @type Number
-       * @default 0
-       */
-      maxSize: {
-        type: Number,
-        value: 0,
-        title: 'Maximum file size (in bytes)'
-      },
-      /**
-       * Minimum acceptable file size for the purposes of validation.
-       * The value is expected to be in bytes.
-       *
-       * @property minSize
-       * @type Number
-       * @default 0
-       */
-      minSize: {
-        type: Number,
-        value: 0,
-        title: 'Minimum file size (in bytes)'
-      },
-      /**
-       * Value of the element contains array of valid files and a count of invalid files
-       *
-       * @property value
-       * @type Object
-       * @default { invalid: {count: 0}, valid: [] }
-       */
-      value: {
-        type: Object,
-        value: function () {
-          return {
-            invalid: {
-              count: 0
-            },
-            valid: []
-          };
-        },
-        readOnly: true,
-        title: 'Value'
-      },
-
-      files: {
-        type: Array,
-        value: function () {
-          return [];
-        },
-        readOnly: true,
-        xtype: "json"
-      },
-      /**
-       * Required state of the element; true = required, false = optional
-       * @property required
-       * @type Boolean
-       * @default false
-       */
-      required: {
-        type: Boolean,
-        value: false,
-        observer: 'requiredChanged',
-        title: 'Input required'
-      },
-      /**
-       * Disabled state of the element; true = disabled, false = enabled
-       * @property disabled
-       * @type Boolean
-       * @default false
-       */
-      disabled: {
-        type: Boolean,
-        value: false,
-        observer: 'disabledChanged',
-        title: 'Field value can not be changed'
-      },
-      /**
-       * Hides the element. When hidden nothing is displayed for the element
-       * @property hide
-       * @type Boolean
-       * @default false
-       */
-      hide: {
-        type: Boolean,
-        value: false,
-        observer: 'hideChanged',
-        title: 'Field is invisible'
-      }
     },
-    $meta: [
-      {
-        title: "Image",
-        type: "string",
-        xtype: "image"
-      }
+
+    observers: [
+      '_internalValidStateUpdate(disabled, hide, required)'
     ],
-    _getLocalized: function (title) {
+
+    $meta: [{
+      title: "Image",
+      type: "string",
+      xtype: "image"
+    }],
+
+    _getLocalized: function(title) {
       return this.T(title);
     },
-    ready: function () {
-      this._isReady = false;
 
-      this._validationFunctions.push(this._validateInternalConstraints.bind(this));
+    _hideLabelChanged: function(newValue, oldValue) {
+      this.toggleClass("hidden", newValue, this.$.label);
+    },
+
+    ready: function() {
+      this._isReady = false;
 
       if (this.maxFiles > 1) {
         this.$.fileInputInput.setAttribute("multiple", "");
@@ -280,27 +296,64 @@
         valid: []
       };
       this._setValue(newValue);
-      this.fire('value-changed', {value: this.value});
+      this._fireValueChangedEvent(this.value);
 
       this._isReady = true;
     },
 
-    focus: function () {
-      var selectAFileButton = this.$.selectButtonText;
-      if (selectAFileButton.focus) {
-        selectAFileButton.focus();
+    _disabledChanged: function(newValue, oldValue) {
+      this.toggleClass('disabled', newValue, this.$.selectFileButton);
+      this.toggleClass('disabled', newValue, this.$.clearButton);
+      var container = this.$.atContainer;
+      this.toggleClass('disabled', newValue, container);
+    },
+
+    _hideChanged: function(newValue, oldValue) {
+      var wrapper = this.$.atContainer;
+      this.toggleClass('hidden', newValue, wrapper);
+    },
+
+    _internalValidStateUpdate: function(disabled, hide, required) {
+      if (this._isReady) {
+        this.validate();
       }
     },
 
-    selectFileClickHandler: function () {
+    validate: function(showError) {
+      if (showError === undefined) {
+        showError = this.autovalidate;
+      }
+
+      var validationResult = this._validateBaseData();
+      if (showError) this._handleValidationResult(validationResult);
+      if (validationResult.isFinal) {
+        return validationResult.isValid;
+      }
+
+      validationResult = this._validateData(this, this.value, this.T.bind(this));
+      if (showError) this._handleValidationResult(validationResult);
+
+      return validationResult.isValid;
+    },
+
+    _updateUIValidState: function(isValid) {
+      var label = this.$.label;
+      this.toggleClass('error', !isValid, label);
+      var contentContainer = this.$.contentContainer;
+      this.toggleClass('error', !isValid, contentContainer);
+    },
+
+    set value(newValue) {},
+
+    set files(newValue) {},
+
+    _selectFileClickHandler: function() {
       var clickEvent = document.createEvent('MouseEvent');
       clickEvent.initEvent('click', false, false);
       this.$.fileInputInput.dispatchEvent(clickEvent);
     },
 
-    set value(newValue) {},
-    set files(newValue) {},
-    changeHandler: function () {
+    _changeHandler: function() {
       var files = Array.prototype.slice.call(this.$.fileInputInput.files),
         invalid = {
           count: 0
@@ -331,7 +384,7 @@
       var files = countLimitValidationResult.valid;
       this._setFiles(files);
       valid = [];
-      files.forEach(function (file) {
+      files.forEach(function(file) {
         valid.push(file.name);
       });
 
@@ -349,7 +402,7 @@
         var fileReader = new FileReader();
         var self = this;
         Polymer.dom(this.$.imagePreview).innerHTML = '';
-        fileReader.onload = function (event) {
+        fileReader.onload = function(event) {
           var newImage = document.createElement('img');
           newImage.classList.add('previewImage');
           newImage.setAttribute('style-scope', 'at-form-image');
@@ -364,11 +417,10 @@
         } catch (e) {}
       }
       this.validate();
-      this.fire('value-changed', {value: this.value});
+      this._fireValueChangedEvent(this.value);
     },
 
-    removeFileClickHandler: function () {
-
+    _removeFileClickHandler: function() {
       this.$.selectButtonText.textContent = this.T('Select an image');
       this.toggleClass('hidden', true, this.$.clearButton);
       this.$.imagePreview.removeChild(this.$.imagePreview.children[0]);
@@ -379,84 +431,10 @@
         },
         valid: []
       });
-      this.fire('value-changed', {value: this.value});
+      this._fireValueChangedEvent(this.value);
     },
 
-    hideLabelChanged: function (newValue, oldValue) {
-      this.toggleClass("hidden", newValue, this.$.label);
-    },
-
-    hideChanged: function (newValue, oldValue) {
-      var wrapper = this.$.atContainer;
-      this.toggleClass('hidden', newValue, wrapper);
-      if (this._isReady) {
-        this.validate();
-      }
-    },
-
-    requiredChanged: function (newValue, oldValue) {
-      if (this._isReady) {
-        this.validate();
-      }
-    },
-
-    disabledChanged: function (newValue, oldValue) {
-      this.toggleClass('disabled', newValue, this.$.selectFileButton);
-      this.toggleClass('disabled', newValue, this.$.clearButton);
-      var container = this.$.atContainer;
-      this.toggleClass('disabled', newValue, container);
-      if (this._isReady) {
-        this.validate();
-      }
-    },
-
-    _updateUIValidState: function (isValid) {
-      var label = this.$.label;
-      this.toggleClass('error', !isValid, label);
-      var contentContainer = this.$.contentContainer;
-      this.toggleClass('error', !isValid, contentContainer);
-    },
-
-    _checkRequired: function (value) {
-      // coerce this.required to boolean; if element doesn't have required property, undefined is coerced to false so final result will be valid = true
-      var required = Boolean(this.required);
-      var valid = !required || (value != undefined && value.valid && value.valid.length > 0);
-      // set the _errorMessage when constraint is not satisfied
-      if (!valid) {
-        this._errorMessage = this.T("This field is required.");
-      }
-      // return result;
-      return valid;
-    },
-
-    _validateInternalConstraints: function (value) {
-      var result = true;
-
-      result = result && value.invalid.count === 0;
-
-      if (!result) {
-        this._errorMessage = 'Value is invalid';
-      }
-
-      return result;
-    },
-
-    /**
-     * To reset the `files` and `invalidFiles` cache on your element,
-     * use the `reset()` function:
-     *
-     *     document.querySelector("file-input").reset();
-     *
-     * @method reset
-     */
-    reset: function () {
-      this.created();
-    },
-    created: function () {
-      // *ij* I do not understand the purpose of this function
-    },
-
-    maxFilesChanged: function (newValue, oldValue) {
+    _maxFilesChanged: function(newValue, oldValue) {
       try {
         var value = Number(newValue);
         var fileInput = this.$.fileInputInput;
@@ -468,7 +446,7 @@
       } catch (e) {}
     },
 
-    _getLowerCaseExtension: function (filename) {
+    _getLowerCaseExtension: function(filename) {
       var extIdx = filename.lastIndexOf(".") + 1;
 
       if (extIdx > 0) {
@@ -476,7 +454,7 @@
       }
     },
 
-    _getResultOfCountLimitValidation: function (limit, files) {
+    _getResultOfCountLimitValidation: function(limit, files) {
       if (limit > 0 && limit < files.length) {
         return {
           invalid: files.slice(limit, files.length),
@@ -484,51 +462,61 @@
         };
       }
 
-      return {invalid: [], valid: files};
+      return {
+        invalid: [],
+        valid: files
+      };
     },
 
-    _getResultOfExtensionsValidation: function (extensionsStr, files) {
+    _getResultOfExtensionsValidation: function(extensionsStr, files) {
       if (extensionsStr) {
         var negate = extensionsStr.charAt(0) === "!",
-          extensions = JSON.parse(extensionsStr.toLowerCase().substr(negate
-            ? 1
-            : 0)),
+          extensions = JSON.parse(extensionsStr.toLowerCase().substr(negate ?
+            1 :
+            0)),
           result = {
             invalid: [],
             valid: []
           };
 
         var self = this;
-        files.forEach(function (file) {
+        files.forEach(function(file) {
           var extension = self._getLowerCaseExtension(file.name);
 
           if (extensions.indexOf(extension) >= 0) {
-            result[negate
-                ? "invalid"
-                : "valid"].push(file);
+            result[negate ?
+              "invalid" :
+              "valid"].push(file);
           } else {
-            result[negate
-                ? "valid"
-                : "invalid"].push(file);
+            result[negate ?
+              "valid" :
+              "invalid"].push(file);
           }
         });
 
         return result;
       }
 
-      return {invalid: [], valid: files};
+      return {
+        invalid: [],
+        valid: files
+      };
     },
 
-    _getResultOfSizeValidation: function (minSize, maxSize, files) {
+    _getResultOfSizeValidation: function(minSize, maxSize, files) {
       if (!minSize && !maxSize) {
-        return {tooBig: [], tooSmall: [], valid: files};
+        return {
+          tooBig: [],
+          tooSmall: [],
+          valid: files
+        };
       }
 
       var valid = [],
         tooBig = [],
         tooSmall = [];
 
-      files.forEach(function (file) {
+      files.forEach(function(file) {
         if (minSize && file.size < minSize) {
           tooSmall.push(file);
         } else if (maxSize && file.size > maxSize) {
@@ -538,12 +526,23 @@
         }
       });
 
-      return {tooBig: tooBig, tooSmall: tooSmall, valid: valid};
+      return {
+        tooBig: tooBig,
+        tooSmall: tooSmall,
+        valid: valid
+      };
+    },
+
+    focus: function() {
+      var selectAFileButton = this.$.selectButtonText;
+      if (selectAFileButton.focus) {
+        selectAFileButton.focus();
+      }
     },
 
     // this function is part of the hint/validation API hint should be displayed when element gains focus behavior can not know when element gained focus but if gived focusable element it can attach to its focus event it should return focusable element
     // if available or null if focusable element doesn't exist
-    _getFocusableElement: function () {
+    _getFocusableElement: function() {
       var focusable = this.$.selectFileButton;
       return focusable;
     }
