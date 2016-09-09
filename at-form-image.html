@@ -265,7 +265,7 @@
     },
 
     observers: [
-      '_internalValidStateUpdate(disabled, hide, required)'
+      '_internalValidStateUpdate(disabled, required)'
     ],
 
     $meta: [{
@@ -299,6 +299,7 @@
       this._fireValueChangedEvent(this.value);
 
       this._isReady = true;
+      this._internalValidStateUpdate(this.disabled, this.required);
     },
 
     _disabledChanged: function(newValue, oldValue) {
@@ -313,7 +314,7 @@
       this.toggleClass('hidden', newValue, wrapper);
     },
 
-    _internalValidStateUpdate: function(disabled, hide, required) {
+    _internalValidStateUpdate: function(disabled, required) {
       if (this._isReady) {
         this.validate();
       }
