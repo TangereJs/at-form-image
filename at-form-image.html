@@ -326,7 +326,7 @@
       }
 
       var validationResult = this._validateBaseData();
-      if (showError) this._handleValidationResult(validationResult);
+      this._handleValidationResult(validationResult);
       if (!validationResult.isValid) {
         return validationResult.isValid;
       }
@@ -344,7 +344,9 @@
       this.toggleClass('error', !isValid, contentContainer);
     },
 
-    set value(newValue) {},
+    set value(newValue) {
+      if (this.autoValidate) { this.validate(); }
+    },
 
     set files(newValue) {},
 
