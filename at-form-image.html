@@ -315,12 +315,31 @@
     },
 
     _internalValidStateUpdate: function(required) {
-      if (this._isReady) {
-        this.validate();
+      if (!this._isReady) return;
+        
+      if (this._showErrorsWhenAttached) {
+        this._showErrorsWhenAttached = undefined;
+        this.validate(true);
+        return;
+      
+      } else if (this._clearErrorsWhenAttached) {
+        this._clearErrorsWhenAttached = undefined;
+        this.validate(false);
+        return;
       }
+
+      this.validate();
     },
 
     validate: function(showError) {
+      if (!this.$ && this.autoValidate == false && showError == true) {
+        // showError should be true when _internalValidStateUpdate is called from ready after element is attached
+        this._showErrorsWhenAttached = true;
+      
+      } else if (!this.$ && this.autoValidate == true && showError == false) {
+        this._clearErrorsWhenAttached = true;
+      }
+
       if (showError === undefined) {
         showError = this.autoValidate;
       }
@@ -338,10 +357,10 @@
     },
 
     _updateUIValidState: function(isValid) {
-      var label = this.$.label;
-      this.toggleClass('error', !isValid, label);
-      var contentContainer = this.$.contentContainer;
-      this.toggleClass('error', !isValid, contentContainer);
+      if (!this.$) return;
+      
+      this.toggleClass('error', !isValid, this.$.label);
+      this.toggleClass('error', !isValid, this.$.contentContainer);
     },
 
     set value(newValue) {
