@@ -3,7 +3,7 @@
 <link rel="import" href="../at-form-behaviors/at-form-behaviors.html">
 <link rel="import" href="../at-theme/at-theme.html">
 <link rel="import" href="../at-carbon-button/at-carbon-button.html">
-<link rel="import" href="../at-carbon-icon-button/at-carbon-icon-button.html">
+<link rel="import" href="../at-carbon-icon/at-carbon-icon.html">
 <link rel="import" href="../iron-label/iron-label.html">
 <link rel="import" href="at-form-image-input-validation.html">
 <!--
@@ -27,8 +27,6 @@
       }
 
       .at-button {
-        @apply(--at-form-input-padding);
-        @apply(--at-form-button);
         margin: 0 2px;
         outline: none;
       }
@@ -52,11 +50,11 @@
         <div id="imagePreview" class="imagePreview"></div>
         <div>
           <at-carbon-button id="selectFileButton" on-click="_selectFileClickHandler" disabled$="{{disabled}}" class="at-button">
-            <at-carbon-icon-button icon="{{icon}}" class="at-button-icon"></at-carbon-icon-button>
+            <at-carbon-icon icon="{{icon}}" class="at-button-icon"></at-carbon-icon>
             <iron-label id="selectButtonText" class="at-button-label">{{_getLocalized("Select an image")}}</iron-label>
           </at-carbon-button>
           <at-carbon-button id="clearButton" on-click="_removeFileClickHandler" disabled$="{{disabled}}" class="at-button hidden">
-            <at-carbon-icon-button icon="cancel" class="at-button-icon"></at-carbon-icon-button>
+            <at-carbon-icon icon="cancel" class="at-button-icon"></at-carbon-icon>
             <iron-label class="at-button-label">{{_getLocalized("Remove")}}</iron-label>
           </at-carbon-button>
         </div>
